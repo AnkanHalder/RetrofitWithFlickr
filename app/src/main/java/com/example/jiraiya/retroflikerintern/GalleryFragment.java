@@ -1,6 +1,7 @@
 package com.example.jiraiya.retroflikerintern;
 
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
@@ -29,8 +30,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class GalleryFragment extends Fragment {
 
     RecyclerView recyclerView;
-    List<String> gsg = new ArrayList<>();
+    List<Photo> gsg = new ArrayList<>();
     Adapter adapter;
+    ProgressDialog pd;
 
     public GalleryFragment() {
         // Required empty public constructor
@@ -44,15 +46,15 @@ public class GalleryFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_gallery, container, false);
         recyclerView = (RecyclerView)view.findViewById(R.id.gallery_recycler_view);
 
-//        for(int i=0;i<60;i++){
-//            GetSetGallery gall = new GetSetGallery();
-//            gsg.add(gall);
-//        }
 
         adapter = new Adapter(getContext(),gsg);
         recyclerView.setAdapter(adapter);
 
-        recyclerView.setLayoutManager(new GridLayoutManager(getContext(),5));
+        recyclerView.setLayoutManager(new GridLayoutManager(getContext(),3));
+        pd= new ProgressDialog(getContext());
+        pd.setMessage("Loading...");
+        pd.setCancelable(false);
+        pd.setCanceledOnTouchOutside(false);
 
         return view;
     }
@@ -60,13 +62,13 @@ public class GalleryFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-
+        pd.show();
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(GalleryApi.BASE_URL)
+                .baseUrl(Api.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
-        GalleryApi galleryApi = retrofit.create(GalleryApi.class);
+        Api api = retrofit.create(Api.class);
 
         Map<String, String> data = new HashMap<>();
         data.put("api_key", "6f102c62f41998d151e5a1b48713cf13");
@@ -75,37 +77,33 @@ public class GalleryFragment extends Fragment {
         data.put("extras", "url_s");
         data.put("method", "flickr.photos.getRecent");
 
-        Call<GetSetGallery> fetch =galleryApi.form_uri(data);
+        Call<GetSetGallery> fetch =api.form_uri(data);
 
         fetch.enqueue(new Callback<GetSetGallery>() {
             @Override
             public void onResponse(Call<GetSetGallery> call, Response<GetSetGallery> response) {
-                Log.d("Received",response.toString());
-                Log.d("Received",response.body().toString());
+//                Log.d("Received",response.toString());
+//                Log.d("Received",response.body().toString());
 
                 List<Photo> photo = response.body().getPhotos().getPhoto();
-                int i=0;
-                for(Photo ph : photo){
 
-                    Log.d("URLS","Url "+i+" :"+ph.getUrl_s());
+                for(Photo ph : photo){
                     if(ph.getUrl_s() != null){
-                        gsg.add(ph.getUrl_s());
+                        gsg.add(ph);
                     }
                 }
                 adapter.notifyDataSetChanged();
-                Log.d("Received_count","Size "+photo.size());
+                pd.dismiss();
             }
 
             @Override
             public void onFailure(Call<GetSetGallery> call, Throwable t) {
-
+                pd.dismiss();
                 Log.d("Received",call.toString());
                 Log.d("Received",t.getMessage());
                 Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
             }
         });
-
-
 
 
 

@@ -1,6 +1,9 @@
 package com.example.jiraiya.retroflikerintern;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -16,10 +19,12 @@ import java.util.List;
 public class Adapter extends RecyclerView.Adapter<MyViewHolder>{
 
     Context context;
-    List<String> images = Collections.EMPTY_LIST;
+    List<Photo> images = Collections.EMPTY_LIST;
     LayoutInflater layoutInflater;
+    private int pos=0;
 
-    Adapter(Context context,List<String> images){
+
+    Adapter(Context context,List<Photo> images){
         this.context = context;
         this.images = images;
         layoutInflater = LayoutInflater.from(context);
@@ -35,8 +40,33 @@ public class Adapter extends RecyclerView.Adapter<MyViewHolder>{
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder myViewHolder, int i) {
-        String path = images.get(i);
-        Picasso.get().load(path).placeholder(R.drawable.jiraiya).into(myViewHolder.image);
+        final Photo path = images.get(i);
+        Picasso.get().load(path.getUrl_s()).placeholder(R.drawable.jiraiya).into(myViewHolder.image);
+
+        if(i > pos){
+            //Scrolling Down
+            AnimationUtils.animate(myViewHolder,true);
+        }else {
+            //Scrolling Up
+            AnimationUtils.animate(myViewHolder,false);
+        }
+        pos = i;
+
+        myViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                FullImageFragment fullImageFragment = new FullImageFragment();
+
+                Bundle args = new Bundle();
+                args.putString("uri", path.getUrl_s());
+                args.putString("id",path.getId());
+                fullImageFragment.setArguments(args);
+
+                ((Activity) context).getFragmentManager().beginTransaction().replace(R.id.frame,
+                        fullImageFragment).addToBackStack(null).commit();
+            }
+        });
     }
 
     @Override
@@ -44,10 +74,6 @@ public class Adapter extends RecyclerView.Adapter<MyViewHolder>{
         return images.size();
     }
 
-    void addData(int pos,String uri){
-        images.add(pos,uri);
-        notifyItemInserted(pos);
-    }
 }
 class MyViewHolder extends RecyclerView.ViewHolder{
 

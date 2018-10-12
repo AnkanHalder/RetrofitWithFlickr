@@ -21,11 +21,24 @@ public class Photo {
     @Expose
     String title;
 
-    public Photo(String id, String owner, String url_s, String title) {
+    @SerializedName("height_s")
+    @Expose
+    int height_s;
+
+    @SerializedName("width_s")
+    @Expose
+    int width_s;
+
+    public Photo() {
+    }
+
+    public Photo(String id, String owner, String url_s, String title, int height_s, int width_s) {
         this.id = id;
         this.owner = owner;
         this.url_s = url_s;
         this.title = title;
+        this.height_s = height_s;
+        this.width_s = width_s;
     }
 
     public String getId() {
@@ -60,6 +73,22 @@ public class Photo {
         this.title = title;
     }
 
+    public int getHeight_s() {
+        return height_s;
+    }
+
+    public void setHeight_s(int height_s) {
+        this.height_s = height_s;
+    }
+
+    public int getWidth_s() {
+        return width_s;
+    }
+
+    public void setWidth_s(int width_s) {
+        this.width_s = width_s;
+    }
+
     @Override
     public String toString() {
         return "Photo{" +
@@ -67,6 +96,8 @@ public class Photo {
                 ", owner='" + owner + '\'' +
                 ", url_s='" + url_s + '\'' +
                 ", title='" + title + '\'' +
+                ", height_s=" + height_s +
+                ", width_s=" + width_s +
                 '}';
     }
 }
